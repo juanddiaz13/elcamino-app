@@ -1,0 +1,22 @@
+{
+  "name": "elcamino-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^3.8.0",
+    "@nuxtjs/tailwindcss": "^6.8.0"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.2"
+  }
+}
