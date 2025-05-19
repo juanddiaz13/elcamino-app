@@ -22,8 +22,8 @@ app.add_middleware(
 )
 
 # Mount static files
-STATIC_PATH = Path(__file__).parent.parent.parent / "frontend" / "static"
-app.mount("/static", StaticFiles(directory=STATIC_PATH), name="static")
+#STATIC_PATH = Path(__file__).parent.parent.parent / "frontend" / "static"
+#app.mount("/static", StaticFiles(directory=STATIC_PATH), name="static")
 
 #Predefined list of supported model names
 SUPPORTED_MODELS = [
@@ -37,6 +37,8 @@ SUPPORTED_MODELS = [
     "Gemini-3.5",
     "Gemini-1.5",
     "Gemini-1.0",
+    "mrm8488/GPT2-spanish",
+
 ]
 
 # Load the model and tokenizer
@@ -68,31 +70,55 @@ async def home(request: Request):
 class ChatbotRequest(BaseModel):
     prompt: str
     
-@app.post("/chatbot")
-async def handle_prompt(request: ChatbotRequest):
+#@app.post("/chatbot")
+#async def handle_prompt(request: ChatbotRequest):
     """ 
     API endpoint to handle chatbot requests.
     It receives a prompt from the frontend, processes it, and returns a response.
     """
-    input_text = request.prompt
+    #input_text = request.prompt
 
     # Create conversation history string
-    history = "\n".join(conversation_history)
+    #history = "\n".join(conversation_history)
 
     # Tokenize the input text and history
-    inputs = tokenizer.encode_plus(history + "\n" + input_text, return_tensors="pt")
+    #inputs = tokenizer.encode_plus(history + "\n" + input_text, return_tensors="pt")
 
     # Generate the response from the model
-    outputs = model.generate(**inputs, max_length=60)
+    #outputs = model.generate(**inputs, max_length=60)
 
     # Decode the response
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+    #response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 
     # Add interaction to conversation history
-    conversation_history.append(f"User: {input_text}")
-    conversation_history.append(f"Bot: {response}")
+    #conversation_history.append(f"User: {input_text}")
+    #conversation_history.append(f"Bot: {response}")
 
-    return response
+    #return response
+
+@app.post("/chatbot")
+async def handle_prompt(request: ChatbotRequest):
+    input_text = request.prompt.strip()
+
+    if not input_text:
+        return "⚠️ El mensaje está vacío."
+
+    try:
+        history = "\n".join(conversation_history)
+        inputs = tokenizer.encode_plus(history + "\n" + input_text, return_tensors="pt", truncation=True)
+
+        outputs = model.generate(**inputs, max_length=60)
+
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+
+        conversation_history.append(f"User: {input_text}")
+        conversation_history.append(f"Bot: {response}")
+
+        return response
+    except Exception as e:
+        print("ERROR:", str(e))
+        return "❌ Hubo un error al generar la respuesta."
+
 
 if __name__ == "__main__":
     import uvicorn

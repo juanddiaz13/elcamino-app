@@ -111,18 +111,43 @@ onMounted(() => {
 });
 
 
-function sendMessage() {
+async function sendMessage() {
   if (!newMessage.value.trim()) return;
-  messages.value.push({ text: newMessage.value, isUser: true });
+
+  const userPrompt = newMessage.value;
+
+  // Mostrar mensaje del usuario
+  messages.value.push({ text: userPrompt, isUser: true });
   newMessage.value = "";
 
-  setTimeout(() => {
-    messages.value.push({
-      text: "Estoy procesando tu solicitud...",
+  // Mostrar respuesta temporal
+  messages.value.push({ text: "Escribiendo...", isUser: false });
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/chatbot", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: userPrompt }),
+    });
+
+    const replyText = await response.text();
+
+    // Reemplaza "Escribiendo..." por respuesta real
+    messages.value.splice(messages.value.length - 1, 1, {
+      text: replyText,
       isUser: false,
     });
-  }, 500);
+  } catch (error) {
+    messages.value.splice(messages.value.length - 1, 1, {
+      text: "❌ Error al contactar al asistente.",
+      isUser: false,
+    });
+    console.error(error);
+  }
 }
+
 
 function triggerFileUpload() {
   fileInput.value?.click();
